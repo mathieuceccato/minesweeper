@@ -1,1 +1,71 @@
 /* You can add global styles to this file, and also import other style files */
+
+@import 'assets/scss/colors';
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    padding: 0;
+    margin: 0;
+    background: $blue;
+    color: $clear;
+    width: 100%;
+    font-family: 'Gloria Hallelujah', cursive;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    box-sizing: border-box;
+}
+
+.bar {
+    position: relative;
+    height: 2px;
+    width: 500px;
+    margin: 150px auto 0;
+    background: $clear;
+
+    .circle {
+        position: absolute;
+        top: -30px;
+        margin-left: -30px;
+        height: 60px;
+        width: 60px;
+        left: 0;
+        background: $clear;
+        border-radius: 30%;
+        animation: move 3s infinite;
+    }
+
+    p {
+        position: absolute;
+        top: -35px;
+        right: -85px;
+        text-transform: uppercase;
+        color: #347fc3;
+        font-family: helvetica, sans-serif;
+        font-weight: bold;
+    }
+
+    @-webkit-keyframes move {
+        0% {
+            left: 0;
+        }
+        50% {
+            left: 100%;
+            -webkit-transform: rotate(450deg);
+            width: 150px;
+            height: 150px;
+        }
+        75% {
+            left: 100%;
+            -webkit-transform: rotate(450deg);
+            width: 150px;
+            height: 150px;
+        }
+        100% {
+            right: 100%;
+        }
+    }
+}
+
