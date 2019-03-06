@@ -2,7 +2,7 @@
      [ngClass]="{'clicked': tile.isClicked, 'is-mine': tile.isMine, 'is-flagged': tile.isFlagged}" class="tile">
     <span *ngIf="tile.isClicked" class="value {{tile.value ? 'value__'+tile.value : ''}}">
         <ng-container *ngIf="tile.isMine; else notAMine">
-            X
+            ★
         </ng-container>
         <ng-template #notAMine>
             {{ tile.value === 0 ? '' : tile.value }}
