@@ -5,6 +5,7 @@ import { IBoard } from '../interfaces/board.interface';
 import { Tile } from '../class/tile.class';
 import { ITile } from '../interfaces/tile.interface';
 import { MinesEnum } from '../enums/mines.enum';
+import {ICoords} from '../interfaces/coords.interface';
 
 
 @Injectable({
@@ -15,6 +16,7 @@ export class GameService implements IBoard {
     public gameHasStarted: boolean = false;
     public rows: ITile[][];
     public difficulty: DifficultyEnum = DifficultyEnum.EASY;
+    private minesCoords: ICoords[] = [];
 
     constructor() {
     }
@@ -22,6 +24,7 @@ export class GameService implements IBoard {
     public newGame(): void {
         console.log('this.difficulty', this.difficulty);
         this.timer = 0;
+        this.minesCoords = [];
         this.gameHasStarted = false;
 
         this.initRows(this.difficulty);
@@ -29,11 +32,11 @@ export class GameService implements IBoard {
         this.calculateValues();
     }
 
-    public propagateDiscovery(y, x): void {
-        if (this.rows[y] && this.rows[y][x] && !this.rows[y][x].isClicked) {
+    public propagateDiscovery(y: number, x: number, shouldBypass?: boolean): void {
+        if (this.rows[y] && this.rows[y][x] && !this.rows[y][x].isFlagged) {
             this.rows[y][x].isClicked = true;
 
-            if (this.rows[y][x].value === 0) {
+            if ((this.rows[y][x].value === 0 && !this.rows[y][x].isClicked) || shouldBypass) {
                 this.propagateDiscovery(y - 1, x - 1);
                 this.propagateDiscovery(y - 1, x);
                 this.propagateDiscovery(y - 1, x + 1);
@@ -62,6 +65,7 @@ export class GameService implements IBoard {
             if (!this.rows[rand1][rand2].isMine) {
                 minesSettled++;
                 this.rows[rand1][rand2].setMine();
+                this.minesCoords.push({y: rand1, x: rand2});
             }
         }
     }

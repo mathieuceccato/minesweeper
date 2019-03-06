@@ -13,6 +13,11 @@ $tile-size: 40px;
     margin-left: -2px;
     cursor: pointer;
 
+    &.is-flagged {
+        color: #222;
+        box-shadow: inset 0 0 20px #0f0;
+    }
+
     &.clicked {
         cursor: default;
         background-color: #589ad7;

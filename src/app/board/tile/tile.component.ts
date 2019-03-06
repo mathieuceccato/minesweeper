@@ -19,6 +19,10 @@ export class TileComponent {
     public clickTile(e): void {
         e.preventDefault();
 
+        if (this.tile.isFlagged) {
+            return;
+        }
+
         if (this.tile.value === 0) {
             console.log('this.x', this.x);
             console.log('this.y', this.y);
@@ -26,10 +30,17 @@ export class TileComponent {
         }
         this.tile.isClicked = true;
 
+        // todo: check if game ended
     }
 
     public onRightClick(e): void {
         e.preventDefault();
-        // todo
+
+        if (this.tile.isClicked) {
+            this.gameService.propagateDiscovery(this.y, this.x, true);
+            return;
+        }
+
+        this.tile.isFlagged = !this.tile.isFlagged;
     }
 }
