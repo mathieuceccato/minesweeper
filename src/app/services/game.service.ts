@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
-import { DifficultyEnum } from '../enums/difficulty.enum';
-import { IBoard } from '../interfaces/board.interface';
+
+import { BehaviorSubject } from 'rxjs';
+
 import { Tile } from '../class/tile.class';
 import { ITile } from '../interfaces/tile.interface';
-import { MinesEnum } from '../enums/mines.enum';
-import {ICoords} from '../interfaces/coords.interface';
-import { BehaviorSubject } from 'rxjs';
+import { IBoard } from '../interfaces/board.interface';
+import { ICoords } from '../interfaces/coords.interface';
+import { DifficultyEnum } from '../enums/difficulty.enum';
+import { config } from '../board/config/game.config';
+import { IGameConfig } from '../interfaces/game-config.interface';
 
 
 @Injectable({
@@ -15,11 +18,10 @@ export class GameService implements IBoard {
     public timer: number = 0;
     public gameHasStarted: boolean = false;
     public rows: ITile[][];
-    public difficulty: DifficultyEnum = DifficultyEnum.MEDIUM;
 
     private _isGameOver: BehaviorSubject<boolean> = new BehaviorSubject(false);
     private minesCoords: ICoords[] = [];
-
+    private selectedConfig: IGameConfig;
 
     constructor() {
     }
@@ -29,19 +31,21 @@ export class GameService implements IBoard {
     }
 
     public set shouldEndGame(value: boolean) {
-        this._isGameOver.next(value);
+        this._isGameOver.next(value); // todo: win / loose ?
     }
 
-    public newGame(): void {
-        // console.log('this.difficulty', this.difficulty);
+    public newGame(difficulty = DifficultyEnum.EASY): ITile[][] {
         this.timer = 0;
         this.minesCoords = [];
         this.gameHasStarted = false;
         this.shouldEndGame = false;
+        this.selectedConfig = config[difficulty];
 
-        this.initRows(this.difficulty);
+        this.initRows();
         this.setMines();
         this.calculateValues();
+
+        return this.rows;
     }
 
     public propagateDiscovery(y: number, x: number, shouldBypass?: boolean): void {
@@ -71,78 +75,88 @@ export class GameService implements IBoard {
     }
 
     public countMinesAround(y, x): number {
-        const max = this.difficulty - 1;
+        const yMax = this.selectedConfig.yRows - 1;
+        const xMax = this.selectedConfig.xRows - 1;
         let minesAround = 0;
 
         if (y > 0) {
             if (x > 0) {
-                if (this.rows[y - 1][x - 1].isMine) minesAround++;
+                if (this.rows[y - 1][x - 1].isMine) {
+                    minesAround++;
+                }
             }
-            if (x < max) {
-                if (this.rows[y - 1][x + 1].isMine) minesAround++;
+            if (x < xMax) {
+                if (this.rows[y - 1][x + 1].isMine) {
+                    minesAround++;
+                }
             }
-            if (this.rows[y - 1][x].isMine) minesAround++;
+            if (this.rows[y - 1][x].isMine) {
+                minesAround++;
+            }
         }
 
         if (x > 0) {
-            if (this.rows[y][x - 1].isMine) minesAround++;
+            if (this.rows[y][x - 1].isMine) {
+                minesAround++;
+            }
         }
-        if (x < max) {
-            if (this.rows[y][x + 1].isMine) minesAround++;
+        if (x < xMax) {
+            if (this.rows[y][x + 1].isMine) {
+                minesAround++;
+            }
         }
 
-        if (y < max) {
+        if (y < yMax) {
             if (x > 0) {
-                if (this.rows[y + 1][x - 1].isMine) minesAround++;
+                if (this.rows[y + 1][x - 1].isMine) {
+                    minesAround++;
+                }
             }
-            if (x < max) {
-                if (this.rows[y + 1][x + 1].isMine) minesAround++;
+            if (x < xMax) {
+                if (this.rows[y + 1][x + 1].isMine) {
+                    minesAround++;
+                }
             }
-            if (this.rows[y + 1][x].isMine) minesAround++;
+            if (this.rows[y + 1][x].isMine) {
+                minesAround++;
+            }
         }
 
         return minesAround;
     }
 
-    public revealBoard(): void {
-        this.rows.forEach(row => {
-            row.forEach(tile => tile.isClicked = true);
-        });
-    }
-
     public revealMines(): void {
-        this.minesCoords.forEach(({y, x}) => this.rows[y][x].isClicked = true);
+        this.minesCoords.forEach(({ y, x }) => this.rows[y][x].isClicked = true);
     }
 
-    private initRows(difficulty: DifficultyEnum): void {
-        const rows = Array.from({ length: difficulty }, () => []);
+    private initRows(): void {
+        this.rows = Array.from({ length: this.selectedConfig.yRows });
 
-        this.rows = rows.map(() => {
-            return Array.from({ length: difficulty }, () => new Tile());
-        });
+        for (let y = 0; y < this.selectedConfig.yRows; y++) {
+            this.rows[y] = Array.from({ length: this.selectedConfig.xRows }, () => new Tile());
+        }
     }
 
     private setMines(): void {
-        for (let minesSettled = 0; minesSettled < MinesEnum.MEDIUM;) {
-            const rand1 = Math.floor(Math.random() * this.difficulty);
-            const rand2 = Math.floor(Math.random() * this.difficulty);
+        for (let minesSettled = 0; minesSettled < this.selectedConfig.mines;) {
+            const rand1 = Math.floor(Math.random() * this.selectedConfig.yRows);
+            const rand2 = Math.floor(Math.random() * this.selectedConfig.xRows);
 
             if (!this.rows[rand1][rand2].isMine) {
                 minesSettled++;
                 this.rows[rand1][rand2].setMine();
-                this.minesCoords.push({y: rand1, x: rand2});
+                this.minesCoords.push({ y: rand1, x: rand2 });
             }
         }
     }
 
     private calculateValues(): void {
-        this.rows.forEach((row, y) => {
-            row.forEach((tile, x) => {
-
-                if (!tile.isMine) {
-                    tile.value = this.countMinesAround(y, x);
+        for (let y = 0; y < this.selectedConfig.yRows; y++) {
+            for (let x = 0; x < this.selectedConfig.xRows; x++) {
+                if (!this.rows[y][x].isMine) {
+                    this.rows[y][x].value = this.countMinesAround(y, x);
                 }
-            });
-        });
+            }
+        }
     }
 }

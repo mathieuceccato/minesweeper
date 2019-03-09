@@ -2,10 +2,9 @@
     <div class="content">
         <header class="header">
             <h1>MINESWEEPER !</h1>
-            <button (click)="newGame()">New Game</button>
 
             <ng-container *ngFor="let difficulty of difficulties">
-                <button (click)="newGame(difficulty)">New Game</button>
+                <button (click)="setDifficulty(difficulty)">New Game</button>
             </ng-container>
         </header>
 

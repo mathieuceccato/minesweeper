@@ -15,14 +15,11 @@ export class AppComponent implements OnInit {
     public rows: ITile[][];
     public gameIsOver: boolean = false;
 
-    private difficulty: DifficultyEnum = DifficultyEnum.EASY;
-
     constructor(private gameService: GameService) {
-        console.log('this.difficulties', this.difficulties);
     }
 
     public ngOnInit(): void {
-        this.gameService.newGame();
+        this.newGame();
         this.gameService.isGameOver()
         .pipe(
             distinctUntilChanged(),
@@ -36,16 +33,11 @@ export class AppComponent implements OnInit {
         .subscribe(gameIsOver => this.gameIsOver = gameIsOver);
     }
 
-    public newGame() {
-        if (this.gameService.gameHasStarted) {
-            return;
-        }
-
-        this.gameService.newGame();
-        this.rows = this.gameService.rows;
+    public setDifficulty(difficulty: DifficultyEnum) {
+        this.newGame(difficulty);
     }
 
-    public setDifficulty(difficulty: DifficultyEnum) {
-        this.gameService.difficulty = difficulty;
+    private newGame(difficulty?: DifficultyEnum) {
+        this.rows = this.gameService.newGame(difficulty);
     }
 }
