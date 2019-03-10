@@ -4,7 +4,7 @@
             <h1>MINESWEEPER !</h1>
 
             <ng-container *ngFor="let difficulty of difficulties">
-                <button (click)="setDifficulty(difficulty)">New Game</button>
+                <button (click)="setDifficulty(difficulty.difficulty)">{{difficulty.name}}</button>
             </ng-container>
         </header>
 
@@ -12,7 +12,10 @@
             <app-board [rows]="rows"></app-board>
         </section>
 
-        <h3 [hidden]="!gameIsOver">Game Over !</h3>
+        <ng-container *ngIf="endGame?.isGameOver">
+            <h3 [hidden]="!endGame?.reason">Congratulations, you win !</h3>
+            <h3 [hidden]="endGame?.reason">Game Over !</h3>
+        </ng-container>
 
         <footer class="footer">
             <p>Mathieu Ceccato</p>

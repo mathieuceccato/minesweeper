@@ -1,7 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { ITile } from '../../interfaces/tile.interface';
 import { GameService } from '../../services/game.service';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { EndGameEnum } from '../../enums/end-game.enum';
 
 
 @Component({
@@ -24,7 +25,7 @@ export class TileComponent implements OnInit {
         .pipe(
             distinctUntilChanged(),
         )
-        .subscribe(gameIsOver => this.gameIsOver = gameIsOver);
+        .subscribe(endGame => this.gameIsOver = endGame.isGameOver);
     }
 
     public clickTile(e): void {
@@ -42,7 +43,10 @@ export class TileComponent implements OnInit {
             this.gameService.propagateDiscovery(this.y, this.x);
         }
         this.tile.isClicked = true;
-        this.gameService.shouldEndGame = this.tile.isMine;
+
+        if (this.tile.isMine) {
+            this.gameService.shouldEndGame = {isGameOver: true, reason: EndGameEnum.LOOSE};
+        }
 
         // todo: check if game ended. How ? Count inital tiles - mines.
         // todo: On each click, decrease the count
@@ -56,12 +60,14 @@ export class TileComponent implements OnInit {
         }
 
         if (this.tile.isClicked) {
-            this.gameService.propagateDiscovery(this.y, this.x, true);
+            if (this.gameService.countAroundTile(this.y, this.x, 'isFlagged') >= this.tile.value) {
+                this.gameService.propagateDiscovery(this.y, this.x, true);
+            }
 
             return;
         }
 
-        this.tile.isFlagged = !this.tile.isFlagged;
+        this.gameService.flagTile(this.y, this.x);
         // todo: add / remove tile from the mines list. If list is empty, the game is won.
     }
 }

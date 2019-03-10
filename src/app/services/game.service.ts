@@ -9,7 +9,11 @@ import { ICoords } from '../interfaces/coords.interface';
 import { DifficultyEnum } from '../enums/difficulty.enum';
 import { config } from '../board/config/game.config';
 import { IGameConfig } from '../interfaces/game-config.interface';
+import { IEndGame } from '../interfaces/end-game.interface';
+import { EndGameEnum } from '../enums/end-game.enum';
 
+
+export type TileKey = 'isMine' | 'isFlagged';
 
 @Injectable({
     providedIn: 'root',
@@ -19,18 +23,18 @@ export class GameService implements IBoard {
     public gameHasStarted: boolean = false;
     public rows: ITile[][];
 
-    private _isGameOver: BehaviorSubject<boolean> = new BehaviorSubject(false);
+    private _isGameOver: BehaviorSubject<IEndGame> = new BehaviorSubject(null);
     private minesCoords: ICoords[] = [];
     private selectedConfig: IGameConfig;
 
     constructor() {
     }
 
-    public isGameOver(): BehaviorSubject<boolean> {
+    public isGameOver(): BehaviorSubject<IEndGame> {
         return this._isGameOver;
     }
 
-    public set shouldEndGame(value: boolean) {
+    public set shouldEndGame(value: IEndGame) {
         this._isGameOver.next(value); // todo: win / loose ?
     }
 
@@ -38,7 +42,7 @@ export class GameService implements IBoard {
         this.timer = 0;
         this.minesCoords = [];
         this.gameHasStarted = false;
-        this.shouldEndGame = false;
+        this.shouldEndGame = {isGameOver: false};
         this.selectedConfig = config[difficulty];
 
         this.initRows();
@@ -67,66 +71,89 @@ export class GameService implements IBoard {
             this.rows[y][x].isClicked = true;
 
             if (this.rows[y][x].isMine) {
-                this.shouldEndGame = true;
+                this.shouldEndGame = {isGameOver: true, reason: EndGameEnum.LOOSE};
 
                 return;
             }
         }
     }
 
-    public countMinesAround(y, x): number {
+    public countAroundTile(y, x, key: TileKey): number {
         const yMax = this.selectedConfig.yRows - 1;
         const xMax = this.selectedConfig.xRows - 1;
-        let minesAround = 0;
+        let itemAroundTile = 0;
 
         if (y > 0) {
             if (x > 0) {
-                if (this.rows[y - 1][x - 1].isMine) {
-                    minesAround++;
+                if (this.rows[y - 1][x - 1][key]) {
+                    itemAroundTile++;
                 }
             }
             if (x < xMax) {
-                if (this.rows[y - 1][x + 1].isMine) {
-                    minesAround++;
+                if (this.rows[y - 1][x + 1][key]) {
+                    itemAroundTile++;
                 }
             }
-            if (this.rows[y - 1][x].isMine) {
-                minesAround++;
+            if (this.rows[y - 1][x][key]) {
+                itemAroundTile++;
             }
         }
 
         if (x > 0) {
-            if (this.rows[y][x - 1].isMine) {
-                minesAround++;
+            if (this.rows[y][x - 1][key]) {
+                itemAroundTile++;
             }
         }
         if (x < xMax) {
-            if (this.rows[y][x + 1].isMine) {
-                minesAround++;
+            if (this.rows[y][x + 1][key]) {
+                itemAroundTile++;
             }
         }
 
         if (y < yMax) {
             if (x > 0) {
-                if (this.rows[y + 1][x - 1].isMine) {
-                    minesAround++;
+                if (this.rows[y + 1][x - 1][key]) {
+                    itemAroundTile++;
                 }
             }
             if (x < xMax) {
-                if (this.rows[y + 1][x + 1].isMine) {
-                    minesAround++;
+                if (this.rows[y + 1][x + 1][key]) {
+                    itemAroundTile++;
                 }
             }
-            if (this.rows[y + 1][x].isMine) {
-                minesAround++;
+            if (this.rows[y + 1][x][key]) {
+                itemAroundTile++;
             }
         }
 
-        return minesAround;
+        return itemAroundTile;
     }
 
-    public revealMines(): void {
-        this.minesCoords.forEach(({ y, x }) => this.rows[y][x].isClicked = true);
+    public flagTile(y: number, x: number): void {
+        const tile = {y, x};
+        const index = this.minesCoords.findIndex(coords => coords.y === tile.y && coords.x === tile.x);
+
+        if (index >= 0) {
+            this.minesCoords.splice(index, 1);
+
+            if (this.minesCoords.length === 0) {
+                this.shouldEndGame = {isGameOver: true, reason: EndGameEnum.WIN};
+            }
+        } else {
+            this.minesCoords.push(tile);
+        }
+
+        this.rows[y][x].isFlagged = !this.rows[y][x].isFlagged;
+    }
+
+    public revealBoard(): void {
+        this.rows.forEach(row => {
+            row.forEach(tile => {
+                if (tile.isMine || tile.isFlagged) {
+                    tile.isClicked = true;
+                }
+            });
+        });
     }
 
     private initRows(): void {
@@ -154,7 +181,7 @@ export class GameService implements IBoard {
         for (let y = 0; y < this.selectedConfig.yRows; y++) {
             for (let x = 0; x < this.selectedConfig.xRows; x++) {
                 if (!this.rows[y][x].isMine) {
-                    this.rows[y][x].value = this.countMinesAround(y, x);
+                    this.rows[y][x].value = this.countAroundTile(y, x, 'isMine');
                 }
             }
         }

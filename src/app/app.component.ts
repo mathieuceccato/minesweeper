@@ -3,6 +3,8 @@ import { DifficultyEnum } from './enums/difficulty.enum';
 import { GameService } from './services/game.service';
 import { ITile } from './interfaces/tile.interface';
 import { distinctUntilChanged, tap } from 'rxjs/operators';
+import { IEndGame } from './interfaces/end-game.interface';
+import { config } from './board/config/game.config';
 
 
 @Component({
@@ -11,9 +13,9 @@ import { distinctUntilChanged, tap } from 'rxjs/operators';
     styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-    public difficulties: DifficultyEnum[] = [DifficultyEnum.EASY, DifficultyEnum.MEDIUM, DifficultyEnum.HARD];
+    public difficulties = config;
     public rows: ITile[][];
-    public gameIsOver: boolean = false;
+    public endGame: IEndGame = null;
 
     constructor(private gameService: GameService) {
     }
@@ -23,14 +25,14 @@ export class AppComponent implements OnInit {
         this.gameService.isGameOver()
         .pipe(
             distinctUntilChanged(),
-            tap(gameIsOver => {
-                console.log('gameIsOver', gameIsOver);
-                if (gameIsOver) {
-                    this.gameService.revealMines();
+            tap(endGame => {
+                console.log('endGame', endGame);
+                if (endGame.isGameOver) {
+                    this.gameService.revealBoard();
                 }
             }),
         )
-        .subscribe(gameIsOver => this.gameIsOver = gameIsOver);
+        .subscribe(endGame => this.endGame = endGame);
     }
 
     public setDifficulty(difficulty: DifficultyEnum) {
