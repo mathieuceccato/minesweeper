@@ -35,7 +35,7 @@ export class GameService implements IBoard {
     }
 
     public set shouldEndGame(value: IEndGame) {
-        this._isGameOver.next(value); // todo: win / loose ?
+        this._isGameOver.next(value);
     }
 
     public newGame(difficulty = DifficultyEnum.EASY): ITile[][] {
@@ -56,16 +56,18 @@ export class GameService implements IBoard {
         if (this.rows[y] && this.rows[y][x] && !this.rows[y][x].isFlagged) {
 
             if ((this.rows[y][x].value === 0 && !this.rows[y][x].isClicked) || (this.rows[y][x].isClicked && shouldBypass)) {
-                this.rows[y][x].isClicked = true;
+                setTimeout(() => {
+                    this.rows[y][x].isClicked = true;
 
-                this.propagateDiscovery(y - 1, x - 1);
-                this.propagateDiscovery(y - 1, x);
-                this.propagateDiscovery(y - 1, x + 1);
-                this.propagateDiscovery(y, x - 1);
-                this.propagateDiscovery(y, x + 1);
-                this.propagateDiscovery(y + 1, x - 1);
-                this.propagateDiscovery(y + 1, x);
-                this.propagateDiscovery(y + 1, x + 1);
+                    this.propagateDiscovery(y - 1, x - 1);
+                    this.propagateDiscovery(y - 1, x);
+                    this.propagateDiscovery(y - 1, x + 1);
+                    this.propagateDiscovery(y, x - 1);
+                    this.propagateDiscovery(y, x + 1);
+                    this.propagateDiscovery(y + 1, x - 1);
+                    this.propagateDiscovery(y + 1, x);
+                    this.propagateDiscovery(y + 1, x + 1);
+                }, 30);
             }
 
             this.rows[y][x].isClicked = true;

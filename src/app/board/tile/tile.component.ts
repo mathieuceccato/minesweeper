@@ -1,8 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { distinctUntilChanged } from 'rxjs/operators';
+import { Component, Input } from '@angular/core';
+
 import { ITile } from '../../interfaces/tile.interface';
+import { TileService } from '../../services/tile.service';
 import { GameService } from '../../services/game.service';
-import { EndGameEnum } from '../../enums/end-game.enum';
 
 
 @Component({
@@ -10,64 +10,28 @@ import { EndGameEnum } from '../../enums/end-game.enum';
     templateUrl: './tile.component.html',
     styleUrls: ['./tile.component.scss'],
 })
-export class TileComponent implements OnInit {
+export class TileComponent {
     @Input() tile: ITile;
     @Input() x: number;
     @Input() y: number;
 
-    private gameIsOver: boolean = false;
-
-    constructor(private gameService: GameService) {
-    }
-
-    public ngOnInit(): void {
-        this.gameService.isGameOver()
-        .pipe(
-            distinctUntilChanged(),
-        )
-        .subscribe(endGame => this.gameIsOver = endGame.isGameOver);
+    constructor(private gameService: GameService,
+                private tileService: TileService) {
     }
 
     public clickTile(e): void {
         e.preventDefault();
 
-        console.log('this.tile', this.tile);
-
-        if (this.tile.isFlagged || this.gameIsOver) {
+        if (this.tile.isFlagged) {
             return;
         }
-
-        if (this.tile.value === 0) {
-            console.log('this.x', this.x);
-            console.log('this.y', this.y);
-            this.gameService.propagateDiscovery(this.y, this.x);
-        }
-        this.tile.isClicked = true;
-
-        if (this.tile.isMine) {
-            this.gameService.shouldEndGame = {isGameOver: true, reason: EndGameEnum.LOOSE};
-        }
-
-        // todo: check if game ended. How ? Count inital tiles - mines.
-        // todo: On each click, decrease the count
+        console.log('this.tile', this.tile);
+        this.tileService.handleClick(this.y, this.x);
     }
 
-    public onRightClick(e): void {
+    public clickRight(e): void {
         e.preventDefault();
 
-        if (this.gameIsOver) {
-            return;
-        }
-
-        if (this.tile.isClicked) {
-            if (this.gameService.countAroundTile(this.y, this.x, 'isFlagged') >= this.tile.value) {
-                this.gameService.propagateDiscovery(this.y, this.x, true);
-            }
-
-            return;
-        }
-
-        this.gameService.flagTile(this.y, this.x);
-        // todo: add / remove tile from the mines list. If list is empty, the game is won.
+        this.tileService.handleRightClick(this.y, this.x);
     }
 }

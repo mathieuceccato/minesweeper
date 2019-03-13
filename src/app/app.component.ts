@@ -5,6 +5,7 @@ import { ITile } from './interfaces/tile.interface';
 import { distinctUntilChanged, tap } from 'rxjs/operators';
 import { IEndGame } from './interfaces/end-game.interface';
 import { config } from './board/config/game.config';
+import { IGameConfig } from './interfaces/game-config.interface';
 
 
 @Component({
@@ -13,9 +14,10 @@ import { config } from './board/config/game.config';
     styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-    public difficulties = config;
+    public difficulties: IGameConfig[] = config;
     public rows: ITile[][];
     public endGame: IEndGame = null;
+    public currentDifficulty: IGameConfig = config[0];
 
     constructor(private gameService: GameService) {
     }
@@ -35,8 +37,9 @@ export class AppComponent implements OnInit {
         .subscribe(endGame => this.endGame = endGame);
     }
 
-    public setDifficulty(difficulty: DifficultyEnum) {
-        this.newGame(difficulty);
+    public setDifficulty(difficulty: IGameConfig) {
+        this.newGame(difficulty.difficulty);
+        this.currentDifficulty = difficulty;
     }
 
     private newGame(difficulty?: DifficultyEnum) {
