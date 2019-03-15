@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { DifficultyEnum } from './enums/difficulty.enum';
-import { GameService } from './services/game.service';
-import { ITile } from './interfaces/tile.interface';
-import { distinctUntilChanged, tap } from 'rxjs/operators';
-import { IEndGame } from './interfaces/end-game.interface';
-import { config } from './board/config/game.config';
-import { IGameConfig } from './interfaces/game-config.interface';
+import {Component, OnInit} from '@angular/core';
+import {DifficultyEnum} from './enums/difficulty.enum';
+import {GameService} from './services/game.service';
+import {ITile} from './interfaces/tile.interface';
+import {distinctUntilChanged, tap} from 'rxjs/operators';
+import {IEndGame} from './interfaces/end-game.interface';
+import {config} from './board/config/game.config';
+import {IGameConfig} from './interfaces/game-config.interface';
 
 
 @Component({
@@ -28,9 +28,9 @@ export class AppComponent implements OnInit {
         .pipe(
             distinctUntilChanged(),
             tap(endGame => {
-                console.log('endGame', endGame);
+                // console.log('endGame', endGame);
                 if (endGame.isGameOver) {
-                    this.gameService.revealBoard();
+                    this.gameService.revealBoard(endGame.reason);
                 }
             }),
         )

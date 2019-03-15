@@ -4,6 +4,7 @@ import { distinctUntilChanged } from 'rxjs/operators';
 
 import { GameService } from './game.service';
 import { EndGameEnum } from '../enums/end-game.enum';
+import {ITile} from '../interfaces/tile.interface';
 
 
 @Injectable({
@@ -25,7 +26,7 @@ export class TileService {
             return;
         }
 
-        const tile = this.gameService.rows[y][x];
+        const tile: ITile = this.gameService.rows[y][x];
 
         if (tile.value === 0) {
             this.gameService.propagateDiscovery(y, x);
@@ -34,10 +35,11 @@ export class TileService {
 
         if (tile.isMine) {
             this.gameService.shouldEndGame = {isGameOver: true, reason: EndGameEnum.LOOSE};
+            console.log('click on a mine');
             return;
         }
 
-        // this.gameService.verify
+        this.gameService.verifyAllTilesClicked();
     }
 
     public handleRightClick(y: number, x: number): void {

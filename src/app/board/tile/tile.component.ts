@@ -1,8 +1,8 @@
-import { Component, Input } from '@angular/core';
+import {Component, Input} from '@angular/core';
 
-import { ITile } from '../../interfaces/tile.interface';
-import { TileService } from '../../services/tile.service';
-import { GameService } from '../../services/game.service';
+import {ITile} from '../../interfaces/tile.interface';
+import {TileService} from '../../services/tile.service';
+import {GameService} from '../../services/game.service';
 
 
 @Component({

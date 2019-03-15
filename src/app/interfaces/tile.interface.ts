@@ -3,6 +3,4 @@ export interface ITile {
     isMine: boolean;
     isFlagged: boolean;
     value?: number | null;
-    setMine: Function;
-    clickMine: Function;
 }

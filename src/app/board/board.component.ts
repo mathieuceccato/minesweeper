@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
-import { ITile } from '../interfaces/tile.interface';
+import {Component, Input} from '@angular/core';
+import {ITile} from '../interfaces/tile.interface';
 
 
 @Component({

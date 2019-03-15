@@ -1,16 +1,16 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 
-import { BehaviorSubject } from 'rxjs';
+import {BehaviorSubject} from 'rxjs';
 
-import { Tile } from '../class/tile.class';
-import { ITile } from '../interfaces/tile.interface';
-import { IBoard } from '../interfaces/board.interface';
-import { ICoords } from '../interfaces/coords.interface';
-import { DifficultyEnum } from '../enums/difficulty.enum';
-import { config } from '../board/config/game.config';
-import { IGameConfig } from '../interfaces/game-config.interface';
-import { IEndGame } from '../interfaces/end-game.interface';
-import { EndGameEnum } from '../enums/end-game.enum';
+import {Tile} from '../class/tile.class';
+import {ITile} from '../interfaces/tile.interface';
+import {IBoard} from '../interfaces/board.interface';
+import {ICoords} from '../interfaces/coords.interface';
+import {DifficultyEnum} from '../enums/difficulty.enum';
+import {config} from '../board/config/game.config';
+import {IGameConfig} from '../interfaces/game-config.interface';
+import {IEndGame} from '../interfaces/end-game.interface';
+import {EndGameEnum} from '../enums/end-game.enum';
 
 
 export type TileKey = 'isMine' | 'isFlagged';
@@ -22,7 +22,9 @@ export class GameService implements IBoard {
     public timer: number = 0;
     public gameHasStarted: boolean = false;
     public rows: ITile[][];
+    public totalFlagged: number = 0;
 
+    private totalClicked: number = 0;
     private _isGameOver: BehaviorSubject<IEndGame> = new BehaviorSubject(null);
     private minesCoords: ICoords[] = [];
     private selectedConfig: IGameConfig;
@@ -40,6 +42,7 @@ export class GameService implements IBoard {
 
     public newGame(difficulty = DifficultyEnum.EASY): ITile[][] {
         this.timer = 0;
+        this.totalFlagged = 0;
         this.minesCoords = [];
         this.gameHasStarted = false;
         this.shouldEndGame = {isGameOver: false};
@@ -135,6 +138,9 @@ export class GameService implements IBoard {
         const tile = {y, x};
         const index = this.minesCoords.findIndex(coords => coords.y === tile.y && coords.x === tile.x);
 
+        this.rows[y][x].isFlagged = !this.rows[y][x].isFlagged;
+        this.totalFlagged = this.rows[y][x].isFlagged ? this.totalFlagged + 1 : this.totalFlagged - 1;
+
         if (index >= 0) {
             this.minesCoords.splice(index, 1);
 
@@ -145,13 +151,28 @@ export class GameService implements IBoard {
             this.minesCoords.push(tile);
         }
 
-        this.rows[y][x].isFlagged = !this.rows[y][x].isFlagged;
     }
 
-    public revealBoard(): void {
+    public verifyAllTilesClicked(): void {
+        for (let y = 0; y < this.selectedConfig.yRows; y++) {
+            for (let x = 0; x < this.selectedConfig.xRows; x++) {
+                if (!this.rows[y][x].isClicked && !this.rows[y][x].isMine) {
+                    return;
+                }
+            }
+        }
+
+        this.shouldEndGame = {isGameOver: true, reason: EndGameEnum.WIN};
+    }
+
+    public revealBoard(safeMode: EndGameEnum): void {
         this.rows.forEach(row => {
             row.forEach(tile => {
                 if (tile.isMine || tile.isFlagged) {
+                    if (safeMode) {
+                        tile.isFlagged = true;
+                    }
+
                     tile.isClicked = true;
                 }
             });
@@ -159,10 +180,10 @@ export class GameService implements IBoard {
     }
 
     private initRows(): void {
-        this.rows = Array.from({ length: this.selectedConfig.yRows });
+        this.rows = Array.from({length: this.selectedConfig.yRows});
 
         for (let y = 0; y < this.selectedConfig.yRows; y++) {
-            this.rows[y] = Array.from({ length: this.selectedConfig.xRows }, () => new Tile());
+            this.rows[y] = Array.from({length: this.selectedConfig.xRows}, () => new Tile());
         }
     }
 
@@ -173,8 +194,8 @@ export class GameService implements IBoard {
 
             if (!this.rows[rand1][rand2].isMine) {
                 minesSettled++;
-                this.rows[rand1][rand2].setMine();
-                this.minesCoords.push({ y: rand1, x: rand2 });
+                this.rows[rand1][rand2].isMine = true;
+                this.minesCoords.push({y: rand1, x: rand2});
             }
         }
     }
