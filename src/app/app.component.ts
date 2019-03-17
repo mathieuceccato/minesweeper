@@ -37,12 +37,12 @@ export class AppComponent implements OnInit {
             this.gameService.getTotalFlagged(), // mines left
         )
         .pipe(
-            tap(([endGame, shouldFlag]) => {
+            tap(([endGame, minesLeft]) => {
                 if (endGame.isGameOver) {
                     this.gameService.revealBoard(endGame.reason);
                 }
 
-                this.calculateMinesLeft(shouldFlag);
+                this.minesLeft = minesLeft;
             }),
         )
         .subscribe(([endGame]) => this.endGame = endGame);
@@ -56,13 +56,5 @@ export class AppComponent implements OnInit {
     private newGame(difficulty?: DifficultyEnum) {
         this.rows = this.gameService.newGame(difficulty);
         this.minesLeft = this.currentDifficulty.mines;
-    }
-
-    private calculateMinesLeft(shouldFlag: number): void {
-        if (this.minesLeft + shouldFlag < 0) {
-            return;
-        }
-
-        this.minesLeft = this.minesLeft + shouldFlag;
     }
 }

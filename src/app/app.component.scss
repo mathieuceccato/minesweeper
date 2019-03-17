@@ -1,7 +1,7 @@
+@import '../assets/scss/colors';
+
 .container {
     height: 100vh;
-    //width: 80%;
-    //max-width: 900px;
     margin: auto;
 
     .content {
@@ -43,8 +43,12 @@
             }
 
             &.selected {
-                background-color: #589ad7;
+                background-color: $blue-hover;
                 width: 135px;
+            }
+
+            &:hover {
+                background-color: $blue-hover;
             }
         }
     }

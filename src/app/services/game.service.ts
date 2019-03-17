@@ -27,6 +27,7 @@ export class GameService implements IBoard {
     private _isGameOver: BehaviorSubject<IEndGame> = new BehaviorSubject(null);
     private minesCoords: ICoords[] = [];
     private selectedConfig: IGameConfig;
+    private minesLeft: number;
 
     constructor() {
     }
@@ -43,8 +44,8 @@ export class GameService implements IBoard {
         return this._totalFlagged;
     }
 
-    public set totalFlagged(value: number) {
-        this._totalFlagged.next(value);
+    public updateTotalFlagged() {
+        this._totalFlagged.next(this.minesLeft);
     }
 
     public newGame(difficulty = DifficultyEnum.EASY): ITile[][] {
@@ -53,6 +54,8 @@ export class GameService implements IBoard {
         this.gameHasStarted = false;
         this.shouldEndGame = {isGameOver: false};
         this.selectedConfig = config[difficulty];
+        this.minesLeft = this.selectedConfig.mines;
+        this.updateTotalFlagged();
 
         this.initRows();
         this.setMines();
@@ -86,6 +89,8 @@ export class GameService implements IBoard {
 
                 return;
             }
+
+            this.verifyAllTilesClicked();
         }
     }
 
@@ -141,11 +146,16 @@ export class GameService implements IBoard {
     }
 
     public flagTile(y: number, x: number): void {
+        if (!this.canFlag(y, x)) {
+            return;
+        }
+
         const tile = {y, x};
         const index = this.minesCoords.findIndex(coords => coords.y === tile.y && coords.x === tile.x);
 
         this.rows[y][x].isFlagged = !this.rows[y][x].isFlagged;
-        this.totalFlagged = this.rows[y][x].isFlagged ? -1 : 1;
+        this.rows[y][x].isFlagged ? this.minesLeft-- : this.minesLeft++;
+        this.updateTotalFlagged();
 
         if (index >= 0) {
             this.minesCoords.splice(index, 1);
@@ -213,5 +223,13 @@ export class GameService implements IBoard {
                 }
             }
         }
+    }
+
+    private canFlag(y: number, x: number): boolean {
+        if (this.rows[y][x].isFlagged) {
+            return true;
+        }
+
+        return this.minesLeft - 1 >= 0;
     }
 }
