@@ -25,7 +25,6 @@ export class TileComponent {
         if (this.tile.isFlagged) {
             return;
         }
-        console.log('this.tile', this.tile);
         this.tileService.handleClick(this.y, this.x);
     }
 

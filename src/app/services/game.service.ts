@@ -22,9 +22,8 @@ export class GameService implements IBoard {
     public timer: number = 0;
     public gameHasStarted: boolean = false;
     public rows: ITile[][];
-    public totalFlagged: number = 0;
 
-    private totalClicked: number = 0;
+    private _totalFlagged: BehaviorSubject<number> = new BehaviorSubject(0);
     private _isGameOver: BehaviorSubject<IEndGame> = new BehaviorSubject(null);
     private minesCoords: ICoords[] = [];
     private selectedConfig: IGameConfig;
@@ -40,9 +39,16 @@ export class GameService implements IBoard {
         this._isGameOver.next(value);
     }
 
+    public getTotalFlagged(): BehaviorSubject<number> {
+        return this._totalFlagged;
+    }
+
+    public set totalFlagged(value: number) {
+        this._totalFlagged.next(value);
+    }
+
     public newGame(difficulty = DifficultyEnum.EASY): ITile[][] {
         this.timer = 0;
-        this.totalFlagged = 0;
         this.minesCoords = [];
         this.gameHasStarted = false;
         this.shouldEndGame = {isGameOver: false};
@@ -139,7 +145,7 @@ export class GameService implements IBoard {
         const index = this.minesCoords.findIndex(coords => coords.y === tile.y && coords.x === tile.x);
 
         this.rows[y][x].isFlagged = !this.rows[y][x].isFlagged;
-        this.totalFlagged = this.rows[y][x].isFlagged ? this.totalFlagged + 1 : this.totalFlagged - 1;
+        this.totalFlagged = this.rows[y][x].isFlagged ? -1 : 1;
 
         if (index >= 0) {
             this.minesCoords.splice(index, 1);
@@ -150,7 +156,6 @@ export class GameService implements IBoard {
         } else {
             this.minesCoords.push(tile);
         }
-
     }
 
     public verifyAllTilesClicked(): void {

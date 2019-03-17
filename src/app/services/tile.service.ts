@@ -35,7 +35,6 @@ export class TileService {
 
         if (tile.isMine) {
             this.gameService.shouldEndGame = {isGameOver: true, reason: EndGameEnum.LOOSE};
-            console.log('click on a mine');
             return;
         }
 
