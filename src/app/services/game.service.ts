@@ -20,9 +20,9 @@ export type TileKey = 'isMine' | 'isFlagged';
 })
 export class GameService implements IBoard {
     public timer: number = 0;
-    public gameHasStarted: boolean = false;
     public rows: ITile[][];
 
+    public _gameHasStarted: BehaviorSubject<boolean> = new BehaviorSubject(false);
     private _totalFlagged: BehaviorSubject<number> = new BehaviorSubject(0);
     private _isGameOver: BehaviorSubject<IEndGame> = new BehaviorSubject(null);
     private minesCoords: ICoords[] = [];
@@ -38,6 +38,14 @@ export class GameService implements IBoard {
 
     public set shouldEndGame(value: IEndGame) {
         this._isGameOver.next(value);
+    }
+
+    public isGameStarted(): BehaviorSubject<boolean> {
+        return this._gameHasStarted;
+    }
+
+    public set gameHasStarted(value: boolean) {
+        this._gameHasStarted.next(value);
     }
 
     public getTotalFlagged(): BehaviorSubject<number> {

@@ -26,6 +26,7 @@ export class TileService {
             return;
         }
 
+        this.gameService.gameHasStarted = true;
         const tile: ITile = this.gameService.rows[y][x];
 
         if (tile.value === 0) {
@@ -46,6 +47,7 @@ export class TileService {
             return;
         }
 
+        this.gameService.gameHasStarted = true;
         const tile = this.gameService.rows[y][x];
 
         if (tile.isClicked) {
