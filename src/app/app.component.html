@@ -11,10 +11,13 @@
         <section class="game">
             <app-board [rows]="rows"></app-board>
 
-            <ng-container *ngIf="endGame?.isGameOver">
+            <div *ngIf="endGame?.isGameOver" class="end-game">
                 <h3 [hidden]="!endGame?.reason">Congratulations, you win !</h3>
                 <h3 [hidden]="endGame?.reason">Game Over !</h3>
-            </ng-container>
+                <div (click)="newGame()" class="new-game">
+                    New game
+                </div>
+            </div>
 
             <div class="difficulty-container">
                 <ng-container *ngFor="let difficulty of difficulties">

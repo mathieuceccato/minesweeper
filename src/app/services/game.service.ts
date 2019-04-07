@@ -6,7 +6,7 @@ import {Tile} from '../class/tile.class';
 import {ITile} from '../interfaces/tile.interface';
 import {IBoard} from '../interfaces/board.interface';
 import {ICoords} from '../interfaces/coords.interface';
-import {DifficultyEnum} from '../enums/difficulty.enum';
+import {Difficulty} from '../enums/difficulty.enum';
 import {config} from '../board/config/game.config';
 import {IGameConfig} from '../interfaces/game-config.interface';
 import {IEndGame} from '../interfaces/end-game.interface';
@@ -56,7 +56,7 @@ export class GameService implements IBoard {
         this._totalFlagged.next(this.minesLeft);
     }
 
-    public newGame(difficulty = DifficultyEnum.EASY): ITile[][] {
+    public newGame(difficulty = Difficulty.EASY): ITile[][] {
         this.timer = 0;
         this.minesCoords = [];
         this.gameHasStarted = false;
@@ -192,11 +192,7 @@ export class GameService implements IBoard {
         this.rows.forEach(row => {
             row.forEach(tile => {
                 if (tile.isMine || tile.isFlagged) {
-                    if (safeMode) {
-                        tile.isFlagged = true;
-                    }
-
-                    tile.isClicked = true;
+                    tile.visible = true;
                 }
             });
         });

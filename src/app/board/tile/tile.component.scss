@@ -16,13 +16,12 @@ $tile-size: 40px;
     margin-left: -2px;
     cursor: pointer;
 
-    &:hover {
+    &:hover:not(.visible) {
         background-color: $blue-hover;
     }
 
     &.is-flagged {
         color: #222;
-        box-shadow: inset 0 0 20px #0f0;
         transition: box-shadow ease .3s;
     }
 
@@ -41,6 +40,23 @@ $tile-size: 40px;
             box-shadow: inset 0 0 20px #f00;
             transition: ease .3s;
         }
+    }
+
+    &.visible {
+        cursor: default;
+
+        &.is-flagged:not(.is-mine) {
+            box-shadow: inset 0 0 20px #f00;
+            transition: ease .3s;
+        }
+    }
+
+    .flag,
+    .bomb {
+        color: #222;
+        font-weight: bold;
+        font-size: 18px;
+        user-select: none;
     }
 
     .value {

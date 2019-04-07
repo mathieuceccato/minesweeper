@@ -24,9 +24,11 @@ export class TimerComponent implements OnInit {
         .subscribe(([gameHasStarted, endGame]) => {
                 if (gameHasStarted && !endGame.isGameOver) {
                     this.startTimer();
-                } else if (endGame.isGameOver) {
+                } else if (endGame.isGameOver || (!gameHasStarted && !endGame.isGameOver)) {
                     this.stopTimer();
-                } else if (!gameHasStarted) {
+                }
+
+                if (!gameHasStarted) {
                     this.resetTimer();
                 }
             });
