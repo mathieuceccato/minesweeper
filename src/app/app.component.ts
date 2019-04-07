@@ -7,7 +7,7 @@ import {config} from './board/config/game.config';
 
 import {GameService} from './services/game.service';
 
-import {DifficultyEnum} from './enums/difficulty.enum';
+import {Difficulty} from './enums/difficulty.enum';
 
 import {ITile} from './interfaces/tile.interface';
 import {IEndGame} from './interfaces/end-game.interface';
@@ -53,7 +53,7 @@ export class AppComponent implements OnInit {
         this.newGame(difficulty.difficulty);
     }
 
-    private newGame(difficulty?: DifficultyEnum) {
+    public newGame(difficulty: Difficulty = this.currentDifficulty.difficulty) {
         this.rows = this.gameService.newGame(difficulty);
         this.minesLeft = this.currentDifficulty.mines;
     }

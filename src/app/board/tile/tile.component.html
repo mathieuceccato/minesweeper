@@ -1,11 +1,26 @@
-<div (click)="clickTile($event)" (contextmenu)="clickRight($event)"
-     [ngClass]="{'clicked': tile.isClicked, 'is-mine': tile.isMine, 'is-flagged': tile.isFlagged}" class="tile">
-    <span *ngIf="tile.isClicked" class="value {{tile.value ? 'value__'+tile.value : ''}}">
+<div (click)="clickTile($event)"
+     (contextmenu)="clickRight($event)"
+     [ngClass]="{'clicked': tile.isClicked, 'is-mine': tile.isMine && (tile.isClicked || tile.visible),
+                 'is-flagged': tile.isFlagged, 'visible': tile.visible}"
+     class="tile">
+
+    <span *ngIf="tile.isClicked; else notClicked" class="value {{tile.value ? 'value__'+tile.value : ''}}">
         <ng-container *ngIf="tile.isMine; else notAMine">
-            ★
+            <i class="fas fa-bomb"></i>
         </ng-container>
         <ng-template #notAMine>
             {{ tile.value === 0 ? '' : tile.value }}
         </ng-template>
+    </span>
+
+    <ng-template #notClicked>
+        <span *ngIf="tile.isMine && tile.visible && !tile.isFlagged" class="bomb">
+            <i class="fas fa-bomb"></i>
+        </span>
+    </ng-template>
+
+
+    <span *ngIf="tile.isFlagged" class="flag">
+        <i class="fas fa-flag-usa"></i>
     </span>
 </div>
